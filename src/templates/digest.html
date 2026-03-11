@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日摘要</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a1a2e;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrapper {
+    width: 100%;
+    padding: 32px 0;
+  }
+  .card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  /* ---- 头部 ---- */
+  .digest-header {
+    padding: 28px 28px 20px 28px;
+    border-bottom: 1px solid #eeeef2;
+  }
+  .digest-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 4px 0;
+  }
+  .digest-date {
+    font-size: 14px;
+    color: #9ca3af;
+  }
+  /* ---- 统计行 ---- */
+  .stats-row {
+    display: flex;
+    border-bottom: 1px solid #eeeef2;
+  }
+  .stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 18px 12px;
+  }
+  .stat-item + .stat-item {
+    border-left: 1px solid #eeeef2;
+  }
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6366f1;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+  /* ---- 徽章 ---- */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .badge-core   { background-color: #6366f1; }
+  .badge-plugin { background-color: #8b5cf6; }
+  .badge-infra  { background-color: #0ea5e9; }
+  .badge-side   { background-color: #f59e0b; }
+  .badge-unknown{ background-color: #94a3b8; }
+  /* ---- 状态 ---- */
+  .status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .status-done     { background-color: #22c55e; }
+  .status-progress { background-color: #3b82f6; }
+  .status-waiting  { background-color: #f59e0b; }
+  /* ---- 项目活动区 ---- */
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 20px 28px 10px 28px;
+  }
+  .project-block {
+    padding: 16px 28px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .project-block:last-child {
+    border-bottom: none;
+  }
+  .project-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .project-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .session-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .session-item {
+    padding: 8px 0 8px 14px;
+    border-left: 3px solid #e5e7eb;
+    margin-bottom: 6px;
+  }
+  .session-item:last-child {
+    margin-bottom: 0;
+  }
+  .session-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+  }
+  .session-summary {
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 2px;
+    line-height: 1.6;
+  }
+  .session-meta {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+  }
+  /* ---- 分隔线 ---- */
+  .divider {
+    border: none;
+    border-top: 1px solid #eeeef2;
+    margin: 0 28px;
+  }
+  /* ---- 追踪表 ---- */
+  .tracker-section {
+    padding: 8px 28px 20px 28px;
+  }
+  .tracker-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .tracker-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    border-bottom: 1px solid #eeeef2;
+  }
+  .tracker-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+  }
+  .tracker-cat {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .progress-bar-bg {
+    width: 60px;
+    height: 6px;
+    background-color: #e5e7eb;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .progress-bar-fill {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #6366f1;
+  }
+  .todos-text {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  /* ---- 页脚 ---- */
+  .footer {
+    padding: 16px 28px;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    border-top: 1px solid #eeeef2;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="card">
+
+  <!-- 头部 -->
+  <div class="digest-header">
+    <div class="digest-title">每日摘要</div>
+    <div class="digest-date">{{ date }}</div>
+  </div>
+
+  <!-- 统计概览 -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-value">{{ total_sessions }}</div>
+      <div class="stat-label">会话数</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">{{ active_project_count }}</div>
+      <div class="stat-label">活跃项目</div>
+    </div>
+    {% if total_time %}
+    <div class="stat-item">
+      <div class="stat-value">{{ total_time }}</div>
+      <div class="stat-label">总时长</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 今日项目活动 -->
+  {% if project_summaries %}
+  <div class="section-title">今日活动</div>
+
+  {% for proj in project_summaries %}
+  <div class="project-block">
+    <div class="project-header">
+      <span class="badge badge-{{ proj.category }}">{{ proj.category_label }}</span>
+      <span class="project-name">{{ proj.name }}</span>
+    </div>
+    <ul class="session-list">
+      {% for s in proj.sessions %}
+      <li class="session-item">
+        <div class="session-title">{{ s.title }}</div>
+        {% if s.summary %}
+        <div class="session-summary">{{ s.summary }}</div>
+        {% endif %}
+        <div class="session-meta">
+          {% if s.status %}
+          <span class="status-badge {% if s.status == '已完成' %}status-done{% elif s.status == '进行中' %}status-progress{% else %}status-waiting{% endif %}">{{ s.status }}</span>
+          {% endif %}
+          {% if s.time %}
+          <span style="margin-left:8px;">{{ s.time }}</span>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div style="padding:28px;text-align:center;color:#9ca3af;font-size:14px;">今日无活动记录</div>
+  {% endif %}
+
+  <!-- 全量项目追踪表 -->
+  {% if tracker_projects %}
+  <hr class="divider">
+  <div class="section-title">项目总览</div>
+  <div class="tracker-section">
+    <table class="tracker-table">
+      <thead>
+        <tr>
+          <th>项目</th>
+          <th>分类</th>
+          <th>状态</th>
+          <th>进度</th>
+          <th>待办</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in tracker_projects %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td><span class="tracker-cat badge-{{ p.category }}">{{ p.category_short }}</span></td>
+          <td>{{ p.status }}</td>
+          <td>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width:{{ p.progress }}%;"></div>
+            </div>
+            <span style="font-size:11px;color:#9ca3af;margin-left:4px;">{{ p.progress }}%</span>
+          </td>
+          <td>
+            {% if p.todos %}
+            <div class="todos-text">{{ p.todos }}</div>
+            {% else %}
+            <span style="color:#d1d5db;">-</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- 页脚 -->
+  <div class="footer">
+    Claude Hook 每日摘要 &middot; 自动生成
+  </div>
+
+</div>
+</div>
+</body>
+</html>

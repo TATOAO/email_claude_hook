@@ -1,0 +1,4 @@
+host: smtp.qq.com
+port: 465
+tls: "on"
+tls_starttls: "off"

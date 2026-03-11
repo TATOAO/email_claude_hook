@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>任务通知</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1a1a2e;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrapper {
+    width: 100%;
+    padding: 32px 0;
+  }
+  .card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .header {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #eeeef2;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .badge-core   { background-color: #6366f1; }
+  .badge-plugin { background-color: #8b5cf6; }
+  .badge-infra  { background-color: #0ea5e9; }
+  .badge-side   { background-color: #f59e0b; }
+  .badge-unknown{ background-color: #94a3b8; }
+  .project-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+  .meta {
+    padding: 16px 28px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+  .meta-row {
+    margin-bottom: 4px;
+  }
+  .meta-label {
+    display: inline-block;
+    width: 72px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  .path {
+    padding: 0 28px 16px 28px;
+    font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+    color: #6b7280;
+    word-break: break-all;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid #eeeef2;
+    margin: 0 28px;
+  }
+  .summary-section {
+    padding: 20px 28px;
+  }
+  .summary-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .summary-content {
+    font-size: 15px;
+    color: #1a1a2e;
+    line-height: 1.7;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 10px;
+  }
+  .status-done     { background-color: #22c55e; }
+  .status-progress { background-color: #3b82f6; }
+  .status-waiting  { background-color: #f59e0b; }
+  .tracker-section {
+    padding: 8px 28px 20px 28px;
+  }
+  .tracker-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .tracker-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .tracker-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    border-bottom: 1px solid #eeeef2;
+  }
+  .tracker-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+  }
+  .tracker-table tr.current-project td {
+    background-color: #f0f0ff;
+    font-weight: 600;
+  }
+  .tracker-cat {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .progress-bar-bg {
+    width: 60px;
+    height: 6px;
+    background-color: #e5e7eb;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .progress-bar-fill {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #6366f1;
+  }
+  .footer {
+    padding: 16px 28px;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    border-top: 1px solid #eeeef2;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="card">
+
+  <!-- 头部 -->
+  <div class="header">
+    <span class="badge badge-{{ category }}">{{ category_label }}</span>
+    <span class="project-name">{{ project_label }}</span>
+  </div>
+
+  <!-- 元信息 -->
+  <div class="meta">
+    <div class="meta-row"><span class="meta-label">事件</span>{{ event_label }}</div>
+    <div class="meta-row"><span class="meta-label">时间</span>{{ time }}</div>
+    <div class="meta-row"><span class="meta-label">会话</span><code style="font-size:12px;color:#6b7280;">{{ session_id }}</code></div>
+  </div>
+
+  <!-- 路径 -->
+  {% if cwd %}
+  <div class="path">{{ cwd }}</div>
+  {% endif %}
+
+  <hr class="divider">
+
+  <!-- 任务摘要 -->
+  <div class="summary-section">
+    <div class="summary-title">任务摘要</div>
+    <div class="summary-content">{{ summary }}</div>
+    {% if status %}
+    <span class="status-badge {{ status_class }}">{{ status }}</span>
+    {% endif %}
+  </div>
+
+  <!-- 项目追踪表 -->
+  {% if tracker_projects %}
+  <hr class="divider">
+  <div class="tracker-section">
+    <div class="tracker-title">项目追踪</div>
+    <table class="tracker-table">
+      <thead>
+        <tr>
+          <th>项目</th>
+          <th>分类</th>
+          <th>状态</th>
+          <th>进度</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in tracker_projects %}
+        <tr{% if p.is_current %} class="current-project"{% endif %}>
+          <td>{{ p.name }}</td>
+          <td><span class="tracker-cat badge-{{ p.category }}">{{ p.category_short }}</span></td>
+          <td>{{ p.status }}</td>
+          <td>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width:{{ p.progress }}%;"></div>
+            </div>
+            <span style="font-size:11px;color:#9ca3af;margin-left:4px;">{{ p.progress }}%</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- 页脚 -->
+  <div class="footer">
+    Claude Hook 自动通知
+  </div>
+
+</div>
+</div>
+</body>
+</html>

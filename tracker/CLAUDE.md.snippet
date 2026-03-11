@@ -1,0 +1,20 @@
+## Project Tracker (claude-email-hook)
+
+You have a global project tracker file at `~/.claude/hooks/project_tracker.md` used by the email notification system.
+
+**When to update:**
+- When you complete an important feature or milestone
+- When project status changes (e.g., "进行中" → "已完成")
+- When significant TODOs are added or resolved
+- When working in a new project directory not yet in the tracker — add it automatically
+
+**How to update:**
+- Use the Edit tool to modify `~/.claude/hooks/project_tracker.md`
+- Keep the existing markdown format: `### ProjectName` with `- **field**: value` entries
+- Categories: core (核心项目), plugin (插件开发), infra (基础设施), side (实验项目)
+- Update **状态** and **进度** fields to reflect current state
+- Add/remove items in **待办** lists
+
+**Do not:**
+- Delete other projects' entries
+- Update on every small change (only at meaningful milestones)

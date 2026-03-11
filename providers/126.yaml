@@ -1,0 +1,4 @@
+host: smtp.126.com
+port: 465
+tls: "on"
+tls_starttls: "off"

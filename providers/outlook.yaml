@@ -1,0 +1,4 @@
+host: smtp.office365.com
+port: 587
+tls: "on"
+tls_starttls: "on"
