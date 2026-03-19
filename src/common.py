@@ -38,6 +38,33 @@ def load_provider(provider_name):
     except Exception:
         return {}
 
+def parse_todo_line(line):
+    """Parse a single todo line. Supports:
+    New format: - [ ] description | 2026-03-08 | 进行中
+    New format: - [x] description | 2026-03-08 | 已完成
+    Old format: - description (no date/status, backward compatible)
+    Returns dict {task, start_date, status} or None.
+    """
+    text = line.strip()
+    if text.startswith("- "):
+        text = text[2:]
+
+    checkbox_match = re.match(r"\[([x ])\]\s*(.+)", text)
+    if checkbox_match:
+        is_done = checkbox_match.group(1) == "x"
+        rest = checkbox_match.group(2)
+        parts = [p.strip() for p in rest.split("|")]
+        task = parts[0]
+        start_date = parts[1] if len(parts) > 1 else ""
+        status = parts[2] if len(parts) > 2 else ("已完成" if is_done else "待办")
+        return {"task": task, "start_date": start_date, "status": status}
+
+    if text and not text.startswith("**"):
+        return {"task": text, "start_date": "", "status": "待办"}
+
+    return None
+
+
 def parse_tracker(config):
     """Parse project_tracker.md, return list of project dicts."""
     tracker_path = Path.home() / ".claude" / "hooks" / "project_tracker.md"
@@ -47,6 +74,7 @@ def parse_tracker(config):
     content = tracker_path.read_text("utf-8")
     projects = []
     current = None
+    in_todos = False
 
     for line in content.splitlines():
         if line.startswith("### "):
@@ -60,16 +88,27 @@ def parse_tracker(config):
                 "progress": "",
                 "todos": [],
             }
+            in_todos = False
         elif current and line.startswith("- **目录**:"):
             current["dir_name"] = line.split(":", 1)[1].strip()
+            in_todos = False
         elif current and line.startswith("- **分类**:"):
             current["category"] = line.split(":", 1)[1].strip()
+            in_todos = False
         elif current and line.startswith("- **状态**:"):
             current["status"] = line.split(":", 1)[1].strip()
+            in_todos = False
         elif current and line.startswith("- **进度**:"):
             current["progress"] = line.split(":", 1)[1].strip()
-        elif current and line.strip().startswith("- ") and not line.strip().startswith("- **"):
-            current["todos"].append(line.strip()[2:])
+            in_todos = False
+        elif current and line.startswith("- **待办**:"):
+            in_todos = True
+        elif current and in_todos and line.strip().startswith("- "):
+            todo = parse_todo_line(line.strip())
+            if todo:
+                current["todos"].append(todo)
+        elif current and in_todos and not line.strip():
+            in_todos = False
 
     if current:
         projects.append(current)
@@ -83,12 +122,16 @@ CATEGORY_LABELS = {
 
 def match_project(cwd, tracker_projects):
     """Match cwd to a tracker project. Returns (project_info, template_projects)."""
+    cwd_normalized = cwd.replace("-", "_").lower()
     dir_name = os.path.basename(cwd)
 
     matched = None
     for p in tracker_projects:
         d = p["dir_name"]
-        if d and (d in dir_name or dir_name in d or d.replace("-", "_") == dir_name.replace("-", "_")):
+        if not d:
+            continue
+        d_normalized = d.replace("-", "_").lower()
+        if f"/{d_normalized}/" in cwd_normalized + "/":
             matched = p
             break
 
@@ -111,14 +154,21 @@ def match_project(cwd, tracker_projects):
     template_projects = []
     for p in tracker_projects:
         cat = p["category"]
+        todo_display = []
+        for t in p["todos"][:10]:
+            if isinstance(t, dict):
+                todo_display.append(t)
+            else:
+                todo_display.append({"task": t, "start_date": "", "status": "待办"})
         template_projects.append({
             "name": p["name"],
             "category": cat,
             "category_short": CATEGORY_LABELS.get(cat, "其他"),
             "status": p["status"],
             "progress": (p["progress"][:40]) if p["progress"] else "",
+            "todos": todo_display,
             "is_current": p.get("dir_name", "") != "" and (
-                p["dir_name"] in dir_name or dir_name in p["dir_name"]
+                f"/{p['dir_name'].replace('-', '_').lower()}/" in cwd_normalized + "/"
             ),
         })
 
@@ -211,6 +261,7 @@ def generate_summary(transcript_text, project_info, project_memory, model="claud
         result = subprocess.run(
             ["claude", "-p", prompt, "--model", model],
             capture_output=True, text=True, timeout=60, env=env,
+            cwd="/tmp",
         )
         if result.returncode == 0 and result.stdout.strip():
             output = result.stdout.strip()

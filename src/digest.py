@@ -50,6 +50,7 @@ def generate_digest_summary(project_summaries_text, model="claude-haiku-4-5-2025
         result = subprocess.run(
             ["claude", "-p", prompt, "--model", model],
             capture_output=True, text=True, timeout=120, env=env,
+            cwd="/tmp",
         )
         if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()

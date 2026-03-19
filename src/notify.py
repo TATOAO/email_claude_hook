@@ -7,8 +7,9 @@ for intelligent summary, renders HTML template, sends via msmtp.
 
 import json
 import os
+import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from jinja2 import Template
@@ -16,11 +17,13 @@ from jinja2 import Template
 from common import (
     load_config,
     parse_tracker,
+    parse_todo_line,
     match_project,
     load_project_memory,
     extract_transcript,
     generate_summary,
     send_email,
+    CATEGORY_LABELS,
 )
 
 
@@ -94,6 +97,68 @@ def main():
     else:
         subject = f"[{cat_label}] {project_label} - {title_suffix}"
 
+    # Build kanban + gantt data
+    today = datetime.now().date()
+    status_class_map = {"待办": "todo", "进行中": "in_progress", "已完成": "done"}
+    all_todos = []
+    all_dates = []
+
+    for tp in template_projects:
+        for t in tp.get("todos", []):
+            start_date_str = t.get("start_date", "") if isinstance(t, dict) else ""
+            task_text = t.get("task", t) if isinstance(t, dict) else t
+            task_status = t.get("status", "待办") if isinstance(t, dict) else "待办"
+
+            start_date = None
+            if start_date_str:
+                try:
+                    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                    all_dates.append(start_date)
+                except ValueError:
+                    pass
+
+            days_elapsed = (today - start_date).days + 1 if start_date else 1
+            days_elapsed = max(1, days_elapsed)
+
+            all_todos.append({
+                "task": task_text,
+                "start_date": start_date_str,
+                "status": task_status,
+                "status_class": status_class_map.get(task_status, "todo"),
+                "project_name": tp["name"],
+                "project_category": tp["category"],
+                "days_elapsed": days_elapsed,
+                "_start_date": start_date,
+            })
+
+    # Gantt timeline
+    gantt_start_date = ""
+    gantt_total_days = 1
+    gantt_date_labels = []
+
+    if all_dates:
+        min_date = min(all_dates)
+        max_date = today
+        gantt_total_days = max((max_date - min_date).days + 2, 7)
+        gantt_start_date = min_date.strftime("%Y-%m-%d")
+
+        for t in all_todos:
+            if t["_start_date"]:
+                t["bar_left_pct"] = round((t["_start_date"] - min_date).days / gantt_total_days * 100, 1)
+                t["bar_width_pct"] = round(t["days_elapsed"] / gantt_total_days * 100, 1)
+            else:
+                t["bar_left_pct"] = 0
+                t["bar_width_pct"] = round(1 / gantt_total_days * 100, 1)
+
+        step = max(gantt_total_days // 4, 1)
+        for i in range(0, gantt_total_days, step):
+            d = min_date + timedelta(days=i)
+            gantt_date_labels.append(d.strftime("%m-%d"))
+        gantt_date_labels.append(max_date.strftime("%m-%d"))
+
+    for t in all_todos:
+        t.pop("_start_date", None)
+
     # Render HTML
     template_path = Path(__file__).parent / "templates" / "notify.html"
     try:
@@ -114,6 +179,10 @@ def main():
         status=status,
         status_class=status_class,
         tracker_projects=template_projects,
+        all_todos=all_todos,
+        gantt_start_date=gantt_start_date,
+        gantt_total_days=gantt_total_days,
+        gantt_date_labels=gantt_date_labels,
     )
 
     try:

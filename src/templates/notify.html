@@ -1,246 +1,240 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>任务通知</title>
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f7;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #1a1a2e;
-    line-height: 1.6;
-    -webkit-text-size-adjust: 100%;
-  }
-  .wrapper {
-    width: 100%;
-    padding: 32px 0;
-  }
-  .card {
-    max-width: 600px;
-    margin: 0 auto;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    overflow: hidden;
-  }
-  .header {
-    padding: 20px 28px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #eeeef2;
-  }
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: 0.5px;
-  }
-  .badge-core   { background-color: #6366f1; }
-  .badge-plugin { background-color: #8b5cf6; }
-  .badge-infra  { background-color: #0ea5e9; }
-  .badge-side   { background-color: #f59e0b; }
-  .badge-unknown{ background-color: #94a3b8; }
-  .project-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1a1a2e;
-  }
-  .meta {
-    padding: 16px 28px;
-    font-size: 13px;
-    color: #6b7280;
-  }
-  .meta-row {
-    margin-bottom: 4px;
-  }
-  .meta-label {
-    display: inline-block;
-    width: 72px;
-    color: #9ca3af;
-    font-weight: 500;
-  }
-  .path {
-    padding: 0 28px 16px 28px;
-    font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 12px;
-    color: #6b7280;
-    word-break: break-all;
-  }
-  .divider {
-    border: none;
-    border-top: 1px solid #eeeef2;
-    margin: 0 28px;
-  }
-  .summary-section {
-    padding: 20px 28px;
-  }
-  .summary-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
-  .summary-content {
-    font-size: 15px;
-    color: #1a1a2e;
-    line-height: 1.7;
-  }
-  .status-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    margin-top: 10px;
-  }
-  .status-done     { background-color: #22c55e; }
-  .status-progress { background-color: #3b82f6; }
-  .status-waiting  { background-color: #f59e0b; }
-  .tracker-section {
-    padding: 8px 28px 20px 28px;
-  }
-  .tracker-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-  }
-  .tracker-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .tracker-table th {
-    text-align: left;
-    padding: 8px 10px;
-    background-color: #f9fafb;
-    color: #6b7280;
-    font-weight: 600;
-    border-bottom: 1px solid #eeeef2;
-  }
-  .tracker-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
-  }
-  .tracker-table tr.current-project td {
-    background-color: #f0f0ff;
-    font-weight: 600;
-  }
-  .tracker-cat {
-    display: inline-block;
-    padding: 1px 6px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #fff;
-  }
-  .progress-bar-bg {
-    width: 60px;
-    height: 6px;
-    background-color: #e5e7eb;
-    border-radius: 3px;
-    display: inline-block;
-    vertical-align: middle;
-  }
-  .progress-bar-fill {
-    height: 6px;
-    border-radius: 3px;
-    background-color: #6366f1;
-  }
-  .footer {
-    padding: 16px 28px;
-    text-align: center;
-    font-size: 11px;
-    color: #9ca3af;
-    border-top: 1px solid #eeeef2;
-  }
+  body { margin: 0; padding: 0; background: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .container { max-width: 560px; margin: 24px auto; }
+  .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .header { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f0f0; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #fff; }
+  .badge-core { background: #6366f1; }
+  .badge-plugin { background: #8b5cf6; }
+  .badge-infra { background: #0ea5e9; }
+  .badge-side { background: #f59e0b; }
+  .badge-unknown { background: #94a3b8; }
+  .project-name { font-size: 18px; font-weight: 700; color: #1a1a2e; }
+  .body { padding: 24px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; color: #64748b; font-size: 13px; }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+  .meta-label { color: #94a3b8; }
+  .divider { height: 1px; background: #f0f0f0; margin: 0; }
+  .section-title { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .summary-content { color: #334155; font-size: 14px; line-height: 1.7; white-space: pre-line; }
+  .status { display: inline-block; margin-top: 16px; padding: 4px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+  .status-done { background: #ecfdf5; color: #059669; }
+  .status-progress { background: #eff6ff; color: #2563eb; }
+  .status-waiting { background: #fef3c7; color: #d97706; }
+  .path { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; color: #94a3b8; word-break: break-all; }
+
+  /* 项目跟踪区域 */
+  .tracker { padding: 20px 24px; }
+  .tracker-list { list-style: none; padding: 0; margin: 0; }
+  .tracker-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .tracker-item:last-child { border-bottom: none; }
+  .tracker-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .tracker-name { color: #1a1a2e; font-weight: 500; font-size: 13px; }
+  .tracker-name.current { color: #6366f1; font-weight: 700; }
+  .tracker-status-text { color: #64748b; font-size: 12px; margin-left: auto; }
+  .tracker-progress { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+  .todo-list { list-style: none; padding: 0; margin: 4px 0 0 20px; }
+  .todo-item { color: #475569; font-size: 12px; line-height: 1.8; padding-left: 14px; position: relative; display: flex; align-items: baseline; gap: 6px; }
+  .todo-item::before { content: "○"; position: absolute; left: 0; color: #cbd5e1; }
+  .todo-task { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .todo-date { flex-shrink: 0; color: #94a3b8; font-size: 11px; width: 62px; text-align: right; }
+  .todo-status { flex-shrink: 0; font-size: 11px; font-weight: 500; padding: 0 6px; border-radius: 3px; white-space: nowrap; }
+  .todo-status.ts-todo { background: #f1f5f9; color: #94a3b8; }
+  .todo-status.ts-in_progress { background: #eff6ff; color: #2563eb; }
+  .todo-status.ts-done { background: #ecfdf5; color: #059669; }
+  .tracker-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-right: 4px; }
+  .tb-core { background: #eef2ff; color: #6366f1; }
+  .tb-plugin { background: #f3e8ff; color: #8b5cf6; }
+  .tb-infra { background: #e0f2fe; color: #0ea5e9; }
+  .tb-side { background: #fef3c7; color: #d97706; }
+  .tb-unknown { background: #f1f5f9; color: #94a3b8; }
+
+  /* 看板视图 */
+  .kanban { padding: 20px 24px; }
+  .kanban-board { display: flex; gap: 10px; }
+  .kanban-column { flex: 1; min-width: 0; }
+  .kanban-col-header { padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #fff; text-align: center; margin-bottom: 8px; }
+  .kanban-col-header.col-todo { background: #94a3b8; }
+  .kanban-col-header.col-in_progress { background: #2563eb; }
+  .kanban-col-header.col-done { background: #059669; }
+  .kanban-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; }
+  .kanban-card-name { color: #334155; font-size: 12px; font-weight: 500; line-height: 1.4; margin-top: 4px; }
+  .kanban-card-date { color: #94a3b8; font-size: 11px; margin-top: 4px; }
+
+  /* 甘特图 */
+  .gantt { padding: 20px 24px; }
+  .gantt-axis { position: relative; height: 24px; border-bottom: 1px solid #e2e8f0; margin-bottom: 8px; }
+  .gantt-axis-label { position: absolute; font-size: 10px; color: #94a3b8; transform: translateX(-50%); top: 4px; }
+  .gantt-row { display: flex; align-items: center; margin-bottom: 6px; }
+  .gantt-label { width: 140px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding-right: 8px; }
+  .gantt-label-text { color: #334155; font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gantt-track { flex: 1; position: relative; height: 18px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+  .gantt-bar { position: absolute; top: 0; height: 100%; border-radius: 3px; min-width: 2px; }
+  .gantt-bar.bar-todo { background: #cbd5e1; }
+  .gantt-bar.bar-in_progress { background: #60a5fa; }
+  .gantt-bar.bar-done { background: #34d399; }
+  .gantt-days { position: absolute; right: 4px; top: 2px; font-size: 10px; color: #fff; font-weight: 500; line-height: 14px; }
+
+  .footer { padding: 16px 24px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #f0f0f0; }
 </style>
 </head>
 <body>
-<div class="wrapper">
-<div class="card">
+<div class="container">
+  <div class="card">
+    <!-- 当前任务 -->
+    <div class="header">
+      <span class="badge badge-{{ category }}">{{ category_label }}</span>
+      <span class="project-name">{{ project_label }}</span>
+    </div>
+    <div class="body">
+      <div class="meta">
+        <div class="meta-item">
+          <span class="meta-label">事件</span> {{ event_label }}
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">时间</span> {{ time }}
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">会话</span> {{ session_id }}
+        </div>
+      </div>
+      <div class="path">{{ cwd }}</div>
+    </div>
 
-  <!-- 头部 -->
-  <div class="header">
-    <span class="badge badge-{{ category }}">{{ category_label }}</span>
-    <span class="project-name">{{ project_label }}</span>
-  </div>
+    <div class="divider"></div>
 
-  <!-- 元信息 -->
-  <div class="meta">
-    <div class="meta-row"><span class="meta-label">事件</span>{{ event_label }}</div>
-    <div class="meta-row"><span class="meta-label">时间</span>{{ time }}</div>
-    <div class="meta-row"><span class="meta-label">会话</span><code style="font-size:12px;color:#6b7280;">{{ session_id }}</code></div>
-  </div>
+    <div class="body">
+      <div class="section-title">任务摘要</div>
+      <div class="summary-content">{{ summary }}</div>
+      {% if status %}
+      <span class="status {{ status_class }}">{{ status }}</span>
+      {% endif %}
+    </div>
 
-  <!-- 路径 -->
-  {% if cwd %}
-  <div class="path">{{ cwd }}</div>
-  {% endif %}
+    {% if tracker_projects %}
+    <div class="divider"></div>
 
-  <hr class="divider">
+    <!-- 项目跟踪 -->
+    <div class="tracker">
+      <div class="section-title">项目跟踪</div>
+      <ul class="tracker-list">
+        {% for p in tracker_projects %}
+        <li class="tracker-item">
+          <div class="tracker-header">
+            <span class="tracker-badge tb-{{ p.category }}">{{ p.category_short }}</span>
+            <span class="tracker-name {{ 'current' if p.is_current else '' }}">{{ p.name }}</span>
+            <span class="tracker-status-text">{{ p.status }}</span>
+          </div>
+          {% if p.progress %}
+          <div class="tracker-progress">{{ p.progress }}</div>
+          {% endif %}
+          {% if p.todos %}
+          <ul class="todo-list">
+            {% for todo in p.todos %}
+            <li class="todo-item">
+              <span class="todo-task">{{ todo.task }}</span>
+              <span class="todo-date">{{ todo.start_date }}</span>
+              <span class="todo-status ts-{{ 'done' if todo.status == '已完成' else ('in_progress' if todo.status == '进行中' else 'todo') }}">{{ todo.status }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
 
-  <!-- 任务摘要 -->
-  <div class="summary-section">
-    <div class="summary-title">任务摘要</div>
-    <div class="summary-content">{{ summary }}</div>
-    {% if status %}
-    <span class="status-badge {{ status_class }}">{{ status }}</span>
+    {% if all_todos %}
+    <div class="divider"></div>
+
+    <!-- 看板视图 -->
+    <div class="kanban">
+      <div class="section-title">看板视图</div>
+      <div class="kanban-board">
+        <!-- 待办列 -->
+        <div class="kanban-column">
+          <div class="kanban-col-header col-todo">待办</div>
+          {% for item in all_todos %}
+          {% if item.status_class == 'todo' %}
+          <div class="kanban-card">
+            <span class="tracker-badge tb-{{ item.project_category }}">{{ item.project_name }}</span>
+            <div class="kanban-card-name">{{ item.task }}</div>
+            <div class="kanban-card-date">{{ item.start_date }}</div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        <!-- 进行中列 -->
+        <div class="kanban-column">
+          <div class="kanban-col-header col-in_progress">进行中</div>
+          {% for item in all_todos %}
+          {% if item.status_class == 'in_progress' %}
+          <div class="kanban-card">
+            <span class="tracker-badge tb-{{ item.project_category }}">{{ item.project_name }}</span>
+            <div class="kanban-card-name">{{ item.task }}</div>
+            <div class="kanban-card-date">{{ item.start_date }}</div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        <!-- 已完成列 -->
+        <div class="kanban-column">
+          <div class="kanban-col-header col-done">已完成</div>
+          {% for item in all_todos %}
+          {% if item.status_class == 'done' %}
+          <div class="kanban-card">
+            <span class="tracker-badge tb-{{ item.project_category }}">{{ item.project_name }}</span>
+            <div class="kanban-card-name">{{ item.task }}</div>
+            <div class="kanban-card-date">{{ item.start_date }}</div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 甘特图 -->
+    <div class="gantt">
+      <div class="section-title">甘特图</div>
+      <!-- 时间轴 -->
+      <div class="gantt-row">
+        <div class="gantt-label"></div>
+        <div class="gantt-axis">
+          {% for label in gantt_date_labels %}
+          <span class="gantt-axis-label" style="left: {{ (loop.index0 / (gantt_date_labels | length - 1) * 100) if gantt_date_labels | length > 1 else 0 }}%;">{{ label }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- 任务行 -->
+      {% for item in all_todos %}
+      <div class="gantt-row">
+        <div class="gantt-label">
+          <span class="tracker-badge tb-{{ item.project_category }}">{{ item.project_name }}</span>
+          <span class="gantt-label-text" title="{{ item.task }}">{{ item.task }}</span>
+        </div>
+        <div class="gantt-track">
+          <div class="gantt-bar bar-{{ item.status_class }}" style="left: {{ item.bar_left_pct|default(0) }}%; width: {{ item.bar_width_pct|default(0) }}%;">
+            {% if item.days_elapsed > 1 %}
+            <span class="gantt-days">{{ item.days_elapsed }}天</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
     {% endif %}
   </div>
 
-  <!-- 项目追踪表 -->
-  {% if tracker_projects %}
-  <hr class="divider">
-  <div class="tracker-section">
-    <div class="tracker-title">项目追踪</div>
-    <table class="tracker-table">
-      <thead>
-        <tr>
-          <th>项目</th>
-          <th>分类</th>
-          <th>状态</th>
-          <th>进度</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in tracker_projects %}
-        <tr{% if p.is_current %} class="current-project"{% endif %}>
-          <td>{{ p.name }}</td>
-          <td><span class="tracker-cat badge-{{ p.category }}">{{ p.category_short }}</span></td>
-          <td>{{ p.status }}</td>
-          <td>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width:{{ p.progress }}%;"></div>
-            </div>
-            <span style="font-size:11px;color:#9ca3af;margin-left:4px;">{{ p.progress }}%</span>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endif %}
-
-  <!-- 页脚 -->
   <div class="footer">
-    Claude Hook 自动通知
+    Claude Code &middot; Powered by claude-haiku-4-5
   </div>
-
-</div>
 </div>
 </body>
 </html>

@@ -13,7 +13,12 @@ You have a global project tracker file at `~/.claude/hooks/project_tracker.md` u
 - Keep the existing markdown format: `### ProjectName` with `- **field**: value` entries
 - Categories: core (核心项目), plugin (插件开发), infra (基础设施), side (实验项目)
 - Update **状态** and **进度** fields to reflect current state
-- Add/remove items in **待办** lists
+- Keep **5-10** specific, actionable TODO items per project
+- TODO format with date and status: `- [ ] 任务描述 | YYYY-MM-DD | 状态`
+  - Status options: 待办, 进行中, 已完成
+  - Completed: `- [x] 已完成的任务 | 2026-03-08 | 已完成`
+  - Date = start date of the task
+- Mark completed TODOs with `[x]`, remove stale ones, add new ones promptly
 
 **Do not:**
 - Delete other projects' entries
