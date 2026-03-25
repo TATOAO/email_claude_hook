@@ -227,6 +227,34 @@ def extract_transcript(path, max_lines=50):
         result = result[-6000:]
     return result
 
+def run_claude_p(prompt, model="claude-haiku-4-5-20251001", timeout=60):
+    """Call claude -p and extract text from stream-json output.
+    The plain result field is empty with extended thinking models,
+    so we parse the streaming messages to get actual text content."""
+    env = os.environ.copy()
+    env["CLAUDE_HOOK_NOTIFY_RUNNING"] = "1"
+
+    result = subprocess.run(
+        ["claude", "-p", prompt, "--model", model,
+         "--output-format", "stream-json", "--verbose"],
+        capture_output=True, text=True, timeout=timeout, env=env,
+        cwd="/tmp", stdin=subprocess.DEVNULL,
+    )
+
+    text_parts = []
+    for line in result.stdout.strip().splitlines():
+        try:
+            data = json.loads(line)
+            if data.get("type") == "assistant":
+                for block in data.get("message", {}).get("content", []):
+                    if block.get("type") == "text":
+                        text_parts.append(block.get("text", ""))
+        except Exception:
+            pass
+
+    return "\n".join(text_parts)
+
+
 def generate_summary(transcript_text, project_info, project_memory, model="claude-haiku-4-5-20251001"):
     """Call claude -p to generate task summary. Returns (title, summary, status)."""
     context_parts = []
@@ -256,35 +284,29 @@ def generate_summary(transcript_text, project_info, project_memory, model="claud
     )
 
     try:
-        env = os.environ.copy()
-        env["CLAUDE_HOOK_NOTIFY_RUNNING"] = "1"
-        result = subprocess.run(
-            ["claude", "-p", prompt, "--model", model],
-            capture_output=True, text=True, timeout=60, env=env,
-            cwd="/tmp",
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            output = result.stdout.strip()
-            output = re.sub(r"^```\w*\n?", "", output)
-            output = re.sub(r"\n?```$", "", output)
-            output = output.strip()
+        output = run_claude_p(prompt, model)
+        if not output.strip():
+            return "任务完成", "摘要生成失败: 模型返回为空", "未知"
 
-            title = "任务完成"
-            status = "已完成"
-            summary_lines = []
-            for line in output.splitlines():
-                if line.startswith("TITLE:"):
-                    title = line.replace("TITLE:", "").strip()
-                elif line.startswith("STATUS:"):
-                    status = line.replace("STATUS:", "").strip()
-                elif line.startswith("SUMMARY:"):
-                    continue
-                else:
-                    summary_lines.append(line)
-            summary = "\n".join(summary_lines).strip()
-            return title, summary or output, status
+        output = re.sub(r"^```\w*\n?", "", output)
+        output = re.sub(r"\n?```$", "", output)
+        output = output.strip()
 
-        return "任务完成", f"摘要生成失败: {result.stderr[:200]}", "未知"
+        title = "任务完成"
+        status = "已完成"
+        summary_lines = []
+        for line in output.splitlines():
+            if line.startswith("TITLE:"):
+                title = line.replace("TITLE:", "").strip()
+            elif line.startswith("STATUS:"):
+                status = line.replace("STATUS:", "").strip()
+            elif line.startswith("SUMMARY:"):
+                continue
+            else:
+                summary_lines.append(line)
+        summary = "\n".join(summary_lines).strip()
+        return title, summary or output, status
+
     except subprocess.TimeoutExpired:
         return "任务完成", "摘要生成超时", "未知"
     except Exception as e:

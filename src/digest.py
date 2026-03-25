@@ -8,7 +8,6 @@ calls claude -p for consolidated summary, renders HTML, sends via msmtp.
 import json
 import os
 import re
-import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -26,6 +25,8 @@ from common import (
 
 def generate_digest_summary(project_summaries_text, model="claude-haiku-4-5-20251001"):
     """Call claude -p to generate a consolidated daily digest."""
+    from common import run_claude_p
+
     prompt = (
         f"你是一个每日工作报告助手。请根据以下今天的 Claude Code 工作记录，"
         f"生成一份简洁的每日工作摘要。\n"
@@ -45,16 +46,8 @@ def generate_digest_summary(project_summaries_text, model="claude-haiku-4-5-2025
     )
 
     try:
-        env = os.environ.copy()
-        env["CLAUDE_HOOK_NOTIFY_RUNNING"] = "1"
-        result = subprocess.run(
-            ["claude", "-p", prompt, "--model", model],
-            capture_output=True, text=True, timeout=120, env=env,
-            cwd="/tmp",
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
-        return None
+        output = run_claude_p(prompt, model, timeout=120)
+        return output.strip() if output.strip() else None
     except Exception:
         return None
 
